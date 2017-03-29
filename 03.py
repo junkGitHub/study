@@ -20,3 +20,6 @@ if Version(sklearn_version) < '0.18':
     from sklearn.grid_search import train_test_split
 else:
     from sklearn.model_selection import train_test_split
+    
+print(50 * '=')
+

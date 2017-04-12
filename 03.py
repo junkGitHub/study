@@ -35,10 +35,6 @@ sc.fit(X_train);
 X_train_std = sc.transform(X_train);
 X_test_std = sc.transform(X_test);
 
-ppn = Perceptron(n_iter=40 , eta0 = 0.1 , random_state=0);
-ppn.fit(X_train_std , y_train);
-
-y_pred = ppn.predict(X_test_std);
 
 def versiontuple(v):
     return tuple(map(int, (v.split("."))))
@@ -85,8 +81,13 @@ def plot_decision_regions(X, y, classifier, test_idx=None, resolution=0.02):
 
 
 X_combined_std = np.vstack((X_train_std, X_test_std))
-
 y_combined = np.hstack((y_train, y_test))
+
+'''
+ppn = Perceptron(n_iter=40 , eta0 = 0.1 , random_state=0);
+ppn.fit(X_train_std , y_train);
+
+y_pred = ppn.predict(X_test_std);
 
 plot_decision_regions(X=X_combined_std, y=y_combined,
                       classifier=ppn, test_idx=range(105, 150))
@@ -94,7 +95,133 @@ plot_decision_regions(X=X_combined_std, y=y_combined,
 plt.xlabel('petal length [standardized]')
 plt.ylabel('petal width [standardized]')
 plt.legend(loc='upper left')
-
+'''
 def sigmoid(z):
     return 1.0 / (1.0 + np.exp(-z))
 
+
+#print('Section: Learning the weights of the logistic cost function')
+# ロジスティック回帰を使ったコスト計算
+
+# 結果が1の時のコスト計算
+def cost_1(z):
+    return - np.log(sigmoid(z));
+
+#結果が0の時のコスト計算
+def cost_0(z):
+    return -np.log(1 - sigmoid(z));
+
+'''
+# -10 から10の0.1刻みのリスト
+z = np.arange(-10 , 10 , 0.1);
+phi_z = sigmoid(z);
+
+# 結果が1の時のコストのプロット
+c1 = [cost_1(x) for x in z];
+plt.plot(phi_z , c1);
+
+# 結果が0の時のコストのプロット
+c0 = [cost_0(x) for x in z];
+plt.plot(phi_z , c0 , linestyle="--");
+
+# 表示
+plt.show();
+'''
+
+# ロジスティック回帰を使った学習
+# Cは逆正則化係数。大きいほど最尤推定の値が重視される。
+# 小さくすると過学習を防ぐためのウェイトへのペナルティが大きくなる。
+'''
+lr = LogisticRegression(C=1000.0 , random_state=0);
+lr.fit(X_train_std , y_train);
+
+plot_decision_regions(X_combined_std , y_combined , classifier=lr , test_idx=range(105 , 150));
+plt.show();
+
+#predict_probaを使ったサンプルの所属関係の確率予測
+print ("proba ",lr.predict_proba(X_test_std[0,:].reshape(1, -1)));
+'''
+
+# Cを変化させた時のプロット
+# Cを小さくするとウェイトが小さくなる
+'''
+weights , params = [] , [];
+for c in np.arange(-5 , 5):
+    lr = LogisticRegression(C = 10**c , random_state=0);
+    lr.fit(X_train_std , y_train);
+    weights.append(lr.coef_[1]);
+    params.append(10 ** c);
+
+weights = np.array(weights);
+plt.plot(params, weights[:, 0],
+         label='petal length')
+plt.plot(params, weights[:, 1], linestyle='--',
+         label='petal width')
+
+plt.xscale("log");
+plt.show();
+'''
+'''
+svm = SVC(kernel="linear" , C=1.0 , random_state=0);
+svm.fit(X_train_std , y_train);
+
+
+plot_decision_regions(X_combined_std, y_combined,
+                      classifier=svm, test_idx=range(105, 150))
+plt.xlabel('petal length [standardized]')
+plt.ylabel('petal width [standardized]')
+plt.legend(loc='upper left')
+plt.show()
+'''
+
+# サポートベクタマシンを使った非線形問題
+
+#データ作成
+np.random.seed(0);
+X_xor = np.random.randn(200 , 2);
+y_xor = np.logical_xor(X_xor[:,0] > 0 , X_xor[:,1] > 0);
+y_xor = np.where(y_xor , 1 , -1);
+
+#plot
+'''
+plt.scatter(X_xor[y_xor == 1, 0],
+            X_xor[y_xor == 1, 1],
+            c='b', marker='x',
+            label='1')
+plt.scatter(X_xor[y_xor == -1, 0],
+            X_xor[y_xor == -1, 1],
+            c='r',
+            marker='s',
+            label='-1')
+
+plt.xlim([-3, 3])
+plt.ylim([-3, 3])
+plt.legend(loc='best')
+# plt.tight_layout()
+# plt.savefig('./figures/xor.png', dpi=300)
+plt.show()
+'''
+'''
+svm = SVC(kernel="rbf" , random_state = 0 , gamma=0.1 , C = 10);
+svm.fit(X_xor , y_xor);
+
+plot_decision_regions(X_xor, y_xor,
+                      classifier=svm)
+
+plt.legend(loc='upper left')
+plt.show()
+'''
+'''
+# irisデータセットをrbfをつかって分類する
+# gammaを大きくすると厳密になるが複雑な境界線になる
+#svm = SVC(kernel='rbf', random_state=0, gamma=0.2, C=1.0)
+svm = SVC(kernel="rbf" , random_state=0 , gamma=100 , C=1);
+svm.fit(X_train_std , y_train);
+plot_decision_regions(X_combined_std, y_combined,
+                      classifier=svm, test_idx=range(105, 150))
+plt.xlabel('petal length [standardized]')
+plt.ylabel('petal width [standardized]')
+plt.legend(loc='upper left')
+plt.show()
+
+'''

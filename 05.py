@@ -44,7 +44,12 @@ X , y = df_wine.iloc[: , 1:].values , df_wine.iloc[: , 0].values;
 X_train , X_test , y_train , y_test = train_test_split(X , y , test_size=0.3 , random_state=0);
 sc = StandardScaler();
 
+
+# •W€‰»
 X_train_std = sc.fit_transform(X_train);
 X_test_std = sc.transform(X_test);
 
+# ‹¤•ªUs—ñ‚ÌŒvZ 
 cov_mat = np.cov(X_train_std.T);
+# http://mathtrain.jp/varcovmatrix
+print np.cov(np.array([[40,80] , [80,90] , [90,100]]).T);
